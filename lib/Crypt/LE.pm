@@ -671,7 +671,11 @@ sub _set_key {
     my $pem = $key->get_private_key_string;
     my ($n, $e) = $key->get_key_parameters;
     return $self->_status(INVALID_DATA, "Key modulus is divisible by a small prime and will be rejected.") if $self->_is_divisible($n);
-    $key->use_pkcs1_padding;
+    #$key->use_pkcs1_padding; # [ 30/SEP/2025 AJMETZ ] - commented out following advice expressed 
+                              # in discussion of Git Issue 102 [ https://github.com/do-know/Crypt-LE/issues/102 ] 
+                              # and feedback on an earlier pull request [ https://github.com/do-know/Crypt-LE/pull/103#pullrequestreview-3220666378 ].
+                              # This will effectively delegate to Crypt::OpenSSL::RSA to set a default padding,
+                              # and avoid the likes of errors such as: "PKCS#1 1.5 is disabled as it is known to be vulnerable to marvin attacks."
     $key->use_sha256_hash;
     $self->{key_params} = { n => $n, e => $e };
     $self->{key} = $key;
